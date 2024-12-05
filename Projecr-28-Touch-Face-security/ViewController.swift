@@ -29,6 +29,8 @@ class ViewController: UIViewController {
         notificationCenter.addObserver(self, selector: #selector(adjustForKeyboard), name: UIResponder.keyboardWillChangeFrameNotification, object: nil)
         
         notificationCenter.addObserver(self, selector: #selector(saveSecretMessage), name: UIApplication.willResignActiveNotification, object: nil)
+        
+        navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(block))
     }
     
     @IBAction func authenticateTapped(_ sender: Any) {
@@ -95,6 +97,14 @@ class ViewController: UIViewController {
         secret.resignFirstResponder()
         secret.isHidden = true
         title = "Nothing to see here"
+    }
+    
+    @objc func block() {
+        print("tape BLOCK")
+        if secret.isHidden == false {
+            secret.isHidden = true
+            print("tape BLOCK - \(secret.isHidden)")
+        }
     }
 }
 
