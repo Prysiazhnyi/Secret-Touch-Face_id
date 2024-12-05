@@ -14,6 +14,7 @@ class ViewController: UIViewController {
     
     let correctPassword = "1234" // Здесь укажите ваш пароль
     var attemptEnterPassword = 0
+    var countWordPassword = 4
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -115,22 +116,43 @@ class ViewController: UIViewController {
         if self.attemptEnterPassword < 2 {
             let alertController = UIAlertController(title: "Enter password", message: "Biometrics not recognized, please enter password manually.", preferredStyle: .alert)
             
+            // Сохраняем ссылку на кнопку для последующего обновления состояния
+            var confirmAction: UIAlertAction!
+            
+            // Добавляем текстовое поле
             alertController.addTextField { textField in
                 textField.placeholder = "Password"
                 textField.isSecureTextEntry = true
-            }
-            
-            let confirmAction = UIAlertAction(title: "Login", style: .default) { _ in
-                if let password = alertController.textFields?.first?.text {
-                    self.validatePassword(password)
+                
+                // Добавляем наблюдателя за изменением текста
+                NotificationCenter.default.addObserver(forName: UITextField.textDidChangeNotification, object: textField, queue: .main) { _ in
+                    // Обновляем состояние кнопки, когда текст изменяется
+                    if let text = textField.text, text.count >= 4 {
+                        confirmAction.isEnabled = true
+                    } else {
+                        confirmAction.isEnabled = false
+                    }
                 }
             }
             
-            let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+            // Создаём кнопку "Login"
+            confirmAction = UIAlertAction(title: "Login", style: .default) { _ in
+                if let password = alertController.textFields?.first?.text {
+                    self.validatePassword(password)
+                    NotificationCenter.default.removeObserver(self, name: UITextField.textDidChangeNotification, object: nil)
+                }
+            }
             
+            // Изначально кнопка "Login" отключена
+            confirmAction.isEnabled = false
+            
+            // Создаём кнопку "Cancel"
+            let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+            NotificationCenter.default.removeObserver(self, name: UITextField.textDidChangeNotification, object: nil)
             alertController.addAction(confirmAction)
             alertController.addAction(cancelAction)
             
+            // Отображаем UIAlertController
             self.present(alertController, animated: true, completion: nil)
         } else {
             attemptEnterPassword = 0
@@ -140,7 +162,7 @@ class ViewController: UIViewController {
     func validatePassword(_ password: String) {
         attemptEnterPassword += 1
         if password == correctPassword {
-            unlockSecretMessage() 
+            unlockSecretMessage()
             print("Пароль верный! Авторизация успешна.")
         } else {
             print("Пароль неверный. Попробуйте снова.")
