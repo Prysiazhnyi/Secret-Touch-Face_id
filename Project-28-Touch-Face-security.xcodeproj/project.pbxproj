@@ -11,7 +11,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		E0B453662D00D32D0055A222 /* Exceptions for "Project-28-Touch-Face-security" folder in "Project-28-Touch-Face-security" target */ = {
+		E03CE4C92D023BFE003DA022 /* Exceptions for "Project-28-Touch-Face-security" folder in "Project-28-Touch-Face-security" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
@@ -24,7 +24,7 @@
 		E0B453562D00D32B0055A222 /* Project-28-Touch-Face-security */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				E0B453662D00D32D0055A222 /* Exceptions for "Project-28-Touch-Face-security" folder in "Project-28-Touch-Face-security" target */,
+				E03CE4C92D023BFE003DA022 /* Exceptions for "Project-28-Touch-Face-security" folder in "Project-28-Touch-Face-security" target */,
 			);
 			path = "Project-28-Touch-Face-security";
 			sourceTree = "<group>";
