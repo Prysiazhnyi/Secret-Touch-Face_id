@@ -12,14 +12,10 @@ class ViewController: UIViewController {
     
     @IBOutlet var secret: UITextView!
     
+    let correctPassword = "1234" // Здесь укажите ваш пароль
+    var attemptEnterPassword = 0
+    
     override func viewDidLoad() {
-        
-        guard let secret = secret else {
-            print("UITextView not initialized")
-            return
-        }
-
-        
         super.viewDidLoad()
         
         title = "Nothing to see here"
@@ -30,7 +26,7 @@ class ViewController: UIViewController {
         
         notificationCenter.addObserver(self, selector: #selector(saveSecretMessage), name: UIApplication.willResignActiveNotification, object: nil)
         
-        navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(block))
+        navigationItem.rightBarButtonItem = nil // Кнопка скрыта по умолчанию
     }
     
     @IBAction func authenticateTapped(_ sender: Any) {
@@ -39,7 +35,7 @@ class ViewController: UIViewController {
         
         if context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) {
             let reason = "Визначте себе!"
-
+            
             context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: reason) {
                 [weak self] success, authenticationError in
                 
@@ -49,7 +45,9 @@ class ViewController: UIViewController {
                     } else {
                         // error
                         let ac = UIAlertController(title: "Authentication failed", message: "You could not be verified; please try again.", preferredStyle: .alert)
-                        ac.addAction(UIAlertAction(title: "OK", style: .default))
+                        ac.addAction(UIAlertAction(title: "OK", style: .default) { [weak self] _ in
+                            self?.showPasswordAlert()
+                        })
                         self?.present(ac, animated: true)
                     }
                 }
@@ -88,6 +86,8 @@ class ViewController: UIViewController {
             secret.text = text
         }
         //secret.text = KeychainWrapper.standard.string(forKey: "SecretMessage") ?? "" // аналог
+        
+        navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(block))
     }
     
     @objc func saveSecretMessage() {
@@ -97,13 +97,54 @@ class ViewController: UIViewController {
         secret.resignFirstResponder()
         secret.isHidden = true
         title = "Nothing to see here"
+        
+        // Скрываем кнопку
+        navigationItem.rightBarButtonItem = nil
     }
     
     @objc func block() {
-        print("tape BLOCK")
+        
         if secret.isHidden == false {
+            saveSecretMessage()
             secret.isHidden = true
             print("tape BLOCK - \(secret.isHidden)")
+        }
+    }
+    
+    func showPasswordAlert() {
+        if self.attemptEnterPassword < 2 {
+            let alertController = UIAlertController(title: "Enter password", message: "Biometrics not recognized, please enter password manually.", preferredStyle: .alert)
+            
+            alertController.addTextField { textField in
+                textField.placeholder = "Password"
+                textField.isSecureTextEntry = true
+            }
+            
+            let confirmAction = UIAlertAction(title: "Login", style: .default) { _ in
+                if let password = alertController.textFields?.first?.text {
+                    self.validatePassword(password)
+                }
+            }
+            
+            let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+            
+            alertController.addAction(confirmAction)
+            alertController.addAction(cancelAction)
+            
+            self.present(alertController, animated: true, completion: nil)
+        } else {
+            attemptEnterPassword = 0
+        }
+    }
+    
+    func validatePassword(_ password: String) {
+        attemptEnterPassword += 1
+        if password == correctPassword {
+            unlockSecretMessage() 
+            print("Пароль верный! Авторизация успешна.")
+        } else {
+            print("Пароль неверный. Попробуйте снова.")
+            showPasswordAlert()
         }
     }
 }
